@@ -1,0 +1,9 @@
+[package]
+name = "vet"
+version = "0.1.0"
+authors = ["Benjamin Herman <benjamin@metanomial.com>"]
+edition = "2021"
+description = "Validation of arbitrary types"
+repository = "https://github.com/metanomial/vet"
+license = "MIT OR Apache-2.0"
+keywords = ["validation"]
