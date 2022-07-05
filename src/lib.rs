@@ -62,13 +62,16 @@
 //! }
 //! ```
 
-use core::ops::Deref;
+#![cfg_attr(not(feature = "std"), no_std)]
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
 
 /// A wrapper around a validated instance
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Vetted<T>(T);
 
-impl<T> Deref for Vetted<T> {
+impl<T> core::ops::Deref for Vetted<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -107,7 +110,8 @@ impl<T: Vet> Vet for Option<T> {
     }
 }
 
-impl<T: Vet> Vet for Vec<T> {
+#[cfg(feature = "alloc")]
+impl<T: Vet> Vet for alloc::vec::Vec<T> {
     type VetError = T::VetError;
 
     fn is_valid(&self) -> Result<(), Self::VetError> {

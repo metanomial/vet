@@ -7,3 +7,8 @@ description = "Validation of arbitrary types"
 repository = "https://github.com/metanomial/vet"
 license = "MIT OR Apache-2.0"
 keywords = ["validation"]
+
+[features]
+default = ["std"]
+std = ["alloc"]
+alloc = []
