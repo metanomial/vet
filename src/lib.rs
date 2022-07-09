@@ -67,6 +67,9 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
+#[cfg(test)]
+mod tests;
+
 /// A wrapper around a validated instance
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Valid<T>(T);

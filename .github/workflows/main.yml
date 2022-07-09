@@ -20,5 +20,9 @@ jobs:
       run: cargo build --no-default-features
     - name: Build no_std with allocator
       run: cargo build --no-default-features --features alloc
-    - name: Run tests
+    - name: Test
       run: cargo test
+    - name: Test no_std
+      run: cargo test --no-default-features
+    - name: Test no_std with allocator
+      run: cargo test --no-default-features --features alloc
