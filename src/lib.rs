@@ -6,9 +6,9 @@
 //!
 //! The `Vet` trait also provides a default implementation of a `vet` method
 //! which, dependant on the result of `is_valid`, either wraps the instance with
-//! a `Vetted<T>` struct or propagates the validation error.
+//! a `Valid<T>` struct or propagates the validation error.
 //!
-//! The `Vetted<T>` wrapper guarantees that the inner value was successfully
+//! The `Valid<T>` wrapper guarantees that the inner value was successfully
 //! validated and remains immutable as long as it is wrapped.
 //!
 //! Implementations for the common standard library types `Vec<T>` and
@@ -17,7 +17,7 @@
 //! # Examples
 //!
 //! ```
-//! use vet::{Vet, Vetted};
+//! use vet::{Valid, Vet};
 //!
 //! #[derive(Debug)]
 //! struct Username(String);
@@ -57,7 +57,7 @@
 //!     }
 //! }
 //!
-//! fn create_account(username: Vetted<Username>) {
+//! fn create_account(username: Valid<Username>) {
 //!     println!("Account {:?} created", username);
 //! }
 //! ```
@@ -69,9 +69,9 @@ extern crate alloc;
 
 /// A wrapper around a validated instance
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Vetted<T>(T);
+pub struct Valid<T>(T);
 
-impl<T> core::ops::Deref for Vetted<T> {
+impl<T> core::ops::Deref for Valid<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -88,12 +88,12 @@ pub trait Vet {
     fn is_valid(&self) -> Result<(), Self::VetError>;
 
     /// Validates this instance and results in a wrapped instance if successful.
-    fn vet(self) -> Result<Vetted<Self>, Self::VetError>
+    fn vet(self) -> Result<Valid<Self>, Self::VetError>
     where
         Self: Sized,
     {
         match self.is_valid() {
-            Ok(()) => Ok(Vetted(self)),
+            Ok(()) => Ok(Valid(self)),
             Err(e) => Err(e),
         }
     }

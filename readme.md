@@ -12,7 +12,7 @@ vet = "0.1"
 ```
 
 ```rust
-use vet::{Vet, Vetted};
+use vet::Vet;
 
 #[derive(Debug)]
 struct Username(String);
