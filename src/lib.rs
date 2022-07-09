@@ -102,6 +102,14 @@ pub trait Vet {
     }
 }
 
+impl<T: Vet, const N: usize> Vet for [T; N] {
+    type VetError = T::VetError;
+
+    fn is_valid(&self) -> Result<(), Self::VetError> {
+        self.iter().try_for_each(|i| i.is_valid())
+    }
+}
+
 impl<T: Vet> Vet for Option<T> {
     type VetError = T::VetError;
 

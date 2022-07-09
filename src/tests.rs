@@ -27,6 +27,18 @@ fn vet_type() {
 }
 
 #[test]
+fn vet_array() {
+    let foo: [EvenUsize; 0] = [];
+    assert!(foo.is_valid().is_ok());
+
+    let foo = [EvenUsize(2), EvenUsize(4)];
+    assert!(foo.is_valid().is_ok());
+
+    let foo = [EvenUsize(12), EvenUsize(0), EvenUsize(5)];
+    assert!(foo.is_valid().is_err());
+}
+
+#[test]
 fn vet_option() {
     let foo = None::<EvenUsize>;
     assert!(foo.is_valid().is_ok());
