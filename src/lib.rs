@@ -115,8 +115,17 @@ impl<T: Vet> Vet for Option<T> {
 
     fn is_valid(&self) -> Result<(), Self::VetError> {
         match self {
-            Some(t) => t.is_valid(),
+            Some(o) => o.is_valid(),
             None => Ok(()),
+        }
+    }
+}
+
+impl<T: Vet> Valid<Option<T>> {
+    pub fn transpose(self) -> Option<Valid<T>> {
+        match self {
+            Valid(Some(o)) => Some(Valid(o)),
+            Valid(None) => None,
         }
     }
 }

@@ -51,6 +51,15 @@ fn vet_option() {
 }
 
 #[test]
+fn transpose_valid_option() {
+    let foo = None::<EvenUsize>.vet().unwrap();
+    assert_eq!(foo.transpose(), None);
+
+    let foo = Some(EvenUsize(84)).vet().unwrap();
+    assert_eq!(foo.transpose(), Some(Valid(EvenUsize(84))));
+}
+
+#[test]
 #[cfg(feature = "alloc")]
 fn vet_vec() {
     use alloc::{vec, vec::Vec};
