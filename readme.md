@@ -65,6 +65,8 @@ fn main() {
 // Any `Valid<Username>` passed is guaranteed
 // to have met the arbitrary validation checks.
 fn create_account(username: Valid<Username>) {
+    let username = username.into_inner(); // Unwrap
+
     println!("Account {:?} created", username);
 }
 ```

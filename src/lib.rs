@@ -74,6 +74,13 @@ mod tests;
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Valid<T>(T);
 
+impl<T> Valid<T> {
+    /// Consumes the `Valid` wrapper, returning the wrapped value.
+    pub fn into_inner(self) -> T {
+        self.0
+    }
+}
+
 impl<T> core::ops::Deref for Valid<T> {
     type Target = T;
 
