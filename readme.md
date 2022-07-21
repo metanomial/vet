@@ -69,6 +69,56 @@ fn create_account(username: Valid<Username>) {
 }
 ```
 
+## Built-in implementations
+
+Implementations are provided for generic arrays `[T: Vet; N]` and the standard
+library types `Vec<T: Vet>` and `Option<T: Vet>`.
+
+Arrays and `Vec`s are only valid if all of their individual elements are valid:
+
+```rust
+let usernames = vec![
+    Username("日向".to_string()),
+    Username("seán462".to_string()),
+    Username("lone wolf".to_string())
+].vet();
+// Invalid, whitespace in the third element
+
+let contact_numbers = [
+    PhoneNumber("427-313-0255"),
+    PhoneNumber("+1 (708) 484-0523")
+].vet();
+// Valid, all elements passed vetting
+```
+
+Options containing `None` are always valid:
+
+```rust
+let mut email: Option<EmailAddress> = None;
+email.vet(); // Valid
+
+let mut email: Option<EmailAddress> = Some("benjamin@@metanomial.com");
+email.vet(); // Invalid, regex test failed
+```
+
+## No-std support
+
+The default `std` feature flag can be disabled to use this library in no_std
+contexts. Modify your dependency entry in `Cargo.toml` like so:
+
+```toml
+[dependencies]
+vet = { version = "0.1", default-features = false }
+```
+
+In no_std contexts with a memory allocator, implementations for `Vec` can be
+reenabled with the `alloc` feature flag:
+
+```toml
+[dependencies]
+vet = { version = "0.1", default-features = false, features = ["alloc"] }
+```
+
 ## License
 
 Licensed under either of
