@@ -1,8 +1,8 @@
 //! Provides an interface for validation of arbitrary types.
 //!
-//! The `Vet` trait requires an implementation of a `VetError` type alias and
-//! an `is_valid` method, which executes arbitrary validation logic and returns
-//! a result indicating whether the instance is valid.
+//! The `Vet` trait requires an `Error` type alias and an implementation of an
+//! `is_valid` method, which executes arbitrary validation logic and returns a
+//! result indicating whether the instance is valid.
 //!
 //! The `Vet` trait also provides a default implementation of a `vet` method
 //! which, dependant on the result of `is_valid`, either wraps the instance with
@@ -11,8 +11,8 @@
 //! The `Valid<T>` wrapper guarantees that the inner value was successfully
 //! validated and remains immutable as long as it is wrapped.
 //!
-//! Implementations for the common standard library types `Vec<T>` and
-//! `Option<T>` are provided.
+//! Implementations for generic arrays, and for the common standard library
+//! types `Vec<T>` and `Option<T>` are provided.
 //!
 //! # Examples
 //!
@@ -23,24 +23,24 @@
 //! struct Username(String);
 //!
 //! #[derive(Debug, PartialEq)]
-//! enum UsernameVetError {
+//! enum InvalidUsername {
 //!     TooShort,
 //!     TooLong,
 //!     InvalidChar,
 //! }
 //!
 //! impl Vet for Username {
-//!     type VetError = UsernameVetError;
+//!     type Error = InvalidUsername;
 //!
-//!     fn is_valid(&self) -> Result<(), Self::VetError> {
+//!     fn is_valid(&self) -> Result<(), Self::Error> {
 //!         if self.0.len() < 3 {
-//!             return Err(Self::VetError::TooShort);
+//!             return Err(Self::Error::TooShort);
 //!         }
 //!         if self.0.len() > 32 {
-//!             return Err(Self::VetError::TooLong);
+//!             return Err(Self::Error::TooLong);
 //!         }
 //!         if self.0.chars().any(|c| !c.is_alphanumeric()) {
-//!             return Err(Self::VetError::InvalidChar);
+//!             return Err(Self::Error::InvalidChar);
 //!         }
 //!         Ok(())
 //!     }
@@ -48,7 +48,7 @@
 //!
 //! fn main() {
 //!     let username = Username(String::from("hi"));
-//!     assert_eq!(username.is_valid(), Err(UsernameVetError::TooShort));
+//!     assert_eq!(username.is_valid(), Err(InvalidUsername::TooShort));
 //!
 //!     let username = Username(String::from("benjamin"));
 //!     match username.vet() {
@@ -85,13 +85,13 @@ impl<T> core::ops::Deref for Valid<T> {
 /// An interface for arbitrary type validation
 pub trait Vet {
     /// The error returned by failed validation
-    type VetError;
+    type Error;
 
     /// Executes arbitrary validation logic on this instance.
-    fn is_valid(&self) -> Result<(), Self::VetError>;
+    fn is_valid(&self) -> Result<(), Self::Error>;
 
     /// Validates this instance and results in a wrapped instance if successful.
-    fn vet(self) -> Result<Valid<Self>, Self::VetError>
+    fn vet(self) -> Result<Valid<Self>, Self::Error>
     where
         Self: Sized,
     {
@@ -103,17 +103,17 @@ pub trait Vet {
 }
 
 impl<T: Vet, const N: usize> Vet for [T; N] {
-    type VetError = T::VetError;
+    type Error = T::Error;
 
-    fn is_valid(&self) -> Result<(), Self::VetError> {
+    fn is_valid(&self) -> Result<(), Self::Error> {
         self.iter().try_for_each(|i| i.is_valid())
     }
 }
 
 impl<T: Vet> Vet for Option<T> {
-    type VetError = T::VetError;
+    type Error = T::Error;
 
-    fn is_valid(&self) -> Result<(), Self::VetError> {
+    fn is_valid(&self) -> Result<(), Self::Error> {
         match self {
             Some(o) => o.is_valid(),
             None => Ok(()),
@@ -132,9 +132,9 @@ impl<T: Vet> Valid<Option<T>> {
 
 #[cfg(feature = "alloc")]
 impl<T: Vet> Vet for alloc::vec::Vec<T> {
-    type VetError = T::VetError;
+    type Error = T::Error;
 
-    fn is_valid(&self) -> Result<(), Self::VetError> {
+    fn is_valid(&self) -> Result<(), Self::Error> {
         self.iter().try_for_each(|t| t.is_valid())
     }
 }

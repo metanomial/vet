@@ -7,8 +7,8 @@ struct EvenUsize(usize);
 struct OddUsize;
 
 impl Vet for EvenUsize {
-    type VetError = OddUsize;
-    fn is_valid(&self) -> Result<(), Self::VetError> {
+    type Error = OddUsize;
+    fn is_valid(&self) -> Result<(), Self::Error> {
         if self.0 % 2 == 0 {
             Ok(())
         } else {

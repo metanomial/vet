@@ -11,47 +11,60 @@ Add a dependency entry in `Cargo.toml`.
 vet = "0.1"
 ```
 
-```rust
-use vet::Vet;
+Implement the `Vet` trait on your type.
 
+```rust
+use vet::{Valid, Vet};
+
+// A valid username consists of between 3 and 32 alphanumeric characters
 #[derive(Debug)]
 struct Username(String);
 
 #[derive(Debug, PartialEq)]
-enum UsernameVetError {
-    TooShort,
-    TooLong,
-    InvalidChar,
+enum InvalidUsername {
+    TooShort, // Under 3 characters
+    TooLong, // Over 3 characters
+    InvalidChar, // Contains non-alphanumeric character
 }
 
 impl Vet for Username {
-    type VetError = UsernameVetError;
-    fn is_valid(&self) -> Result<(), Self::VetError> {
+    type Error = InvalidUsername;
+
+    // Arbitrary logic to validate the Username type
+    fn is_valid(&self) -> Result<(), Self::Error> {
         if self.0.len() < 3 {
-            return Err(Self::VetError::TooShort);
+            return Err(Self::Error::TooShort);
         }
         if self.0.len() > 32 {
-            return Err(Self::VetError::TooLong);
+            return Err(Self::Error::TooLong);
         }
         if self.0.chars().any(|c| !c.is_alphanumeric()) {
-            return Err(Self::VetError::InvalidChar);
+            return Err(Self::Error::InvalidChar);
         }
         Ok(())
     }
 }
+```
 
+Vetted types provide safety guarantees for the types contents.
+
+```rust
 fn main() {
-    let username = Username(String::from("hi"));
-    assert_eq!(username.is_valid(), Err(UsernameVetError::TooShort));
-    
-    let username = Username(String::from("benjamin"));
+    let args: Vec<String> = env::args().collect();
+    let username = Username(args[1].clone());
+
+    // If successfully vetted, the username will be wrapped in a `Valid` struct
     match username.vet() {
         Ok(username) => create_account(username),
-        Err(error) => println!("Could not create account: {:?}", error),
+        Err(InvalidUsername::TooShort) => eprintln!("Username too short! (3 min)"),
+        Err(InvalidUsername::TooLong) => eprintln!("Username too long! (32 max)"),
+        Err(InvalidUsername::InvalidChar) => eprintln!("Username contains invalid characters!"),
     }
 }
 
-fn create_account(username: Vetted<Username>) {
+// Any `Valid<Username>` passed is guaranteed
+// to have met the arbitrary validation checks.
+fn create_account(username: Valid<Username>) {
     println!("Account {:?} created", username);
 }
 ```
