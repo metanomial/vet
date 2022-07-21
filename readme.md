@@ -1,6 +1,6 @@
 # Vet
 
-A library for validation of arbitrary types.
+Arbitrary type validation.
 
 ## Usage
 
@@ -46,24 +46,22 @@ impl Vet for Username {
 }
 ```
 
-Vetted types provide safety guarantees for the types contents.
+`Valid`-wrapped types provide safety guarantees about their contents.
 
 ```rust
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let username = Username(args[1].clone());
+    
+    let username: Username = Username(args[1].clone());
+    let username: Result<Valid<Username>, InvalidUsername> = username.vet();
 
-    // If successfully vetted, the username will be wrapped in a `Valid` struct
-    match username.vet() {
-        Ok(username) => create_account(username),
-        Err(InvalidUsername::TooShort) => eprintln!("Username too short! (3 min)"),
-        Err(InvalidUsername::TooLong) => eprintln!("Username too long! (32 max)"),
-        Err(InvalidUsername::InvalidChar) => eprintln!("Username contains invalid characters!"),
+    match username {
+        Ok(n) => create_account(n),
+        Err(e) => eprintln!("Invalid username: {:?}", e),
     }
 }
 
-// Any `Valid<Username>` passed is guaranteed
-// to have met the arbitrary validation checks.
+// Any `Valid<Username>` passed is guaranteed to be 3-32 alphanumeric characters.
 fn create_account(username: Valid<Username>) {
     let username = username.into_inner(); // Unwrap
 
